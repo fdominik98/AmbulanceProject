@@ -1,0 +1,12 @@
+MAS proba2 {
+
+	infrastructure: Centralised
+
+	environment: AmbulanceEnv
+
+	agents:
+		agent1 sample_agent;
+
+	aslSourcePath:
+		"src/asl";
+}
