@@ -1,4 +1,4 @@
-// Agent sample_agent in project proba2
+
 
 /* Initial beliefs and rules */
 

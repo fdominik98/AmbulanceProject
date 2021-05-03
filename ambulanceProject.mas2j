@@ -1,11 +1,13 @@
-MAS proba2 {
+MAS ambulanceProject {
 
 	infrastructure: Centralised
 
 	environment: AmbulanceEnv
 
 	agents:
-		agent1 sample_agent;
+		ambulance #4;
+		station #2;
+		hospital #2;
 
 	aslSourcePath:
 		"src/asl";
