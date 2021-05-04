@@ -38,5 +38,8 @@ public class RescueFramework {
         String timeStamp = new SimpleDateFormat("HH:mm:ss.SSS").format(Calendar.getInstance().getTime());
         System.out.println("["+timeStamp+"] "+message);
     }
+    public static Map getMap() {
+    	return map;
+    }
     
 }

@@ -8,6 +8,7 @@ public class Injured {
     private int health = 1000;
     // True if the injured have already been transported to an exit cell
     private boolean saved = false;
+    private boolean beingSaved = false;
     // Cell location of the injured
     private Cell location = null;
     // Static ID value of the next injured
@@ -15,6 +16,12 @@ public class Injured {
     // ID of the injured object
     private int id;
 
+    public void beingSaved() {
+    	beingSaved = true;
+    }
+    public boolean getBeingSaved() {
+    	return beingSaved;
+    }
     /**
      * Returns the location cell of the injured
      * @return      The location cell of the injured

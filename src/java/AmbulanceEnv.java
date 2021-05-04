@@ -3,13 +3,19 @@
 import jason.asSyntax.*;
 import jason.environment.*;
 import rescueframework.RescueFramework;
+import world.Injured;
+import world.Map;
 import jason.asSyntax.parser.*;
 
 import java.util.logging.*;
 
 public class AmbulanceEnv extends Environment {
 
-    private Logger logger = Logger.getLogger("proba2."+AmbulanceEnv.class.getName());
+	
+    public static final Term    callAct = Literal.parseLiteral("actIfHasCall(call)");
+    
+    private Logger logger = Logger.getLogger("ambulanceProject."+AmbulanceEnv.class.getName());
+    private Map map;
     
     public AmbulanceEnv() {
     	RescueFramework.start();    	
@@ -27,10 +33,13 @@ public class AmbulanceEnv extends Environment {
     }
 
     @Override
-    public boolean executeAction(String agName, Structure action) {
-        logger.info("executing: "+action+", but not implemented!");
-        if (true) { // you may improve this condition
-             informAgsEnvironmentChanged();
+    public boolean executeAction(String agName, Structure action) {    
+    	map = RescueFramework.getMap();       
+        if (action.equals(callAct)) { // you may improve this condition
+            checkForCalls(agName);
+        }
+        else {
+        	return false;
         }
         return true; // the action was executed with success
     }
@@ -40,4 +49,16 @@ public class AmbulanceEnv extends Environment {
     public void stop() {
         super.stop();
     }
+    
+    public void checkForCalls(String agName) {
+    	for(Injured i : map.getInjureds()) {
+    		if(!i.getBeingSaved()) {
+    			logger.info(agName + " received a call");
+    			i.beingSaved();
+    		}
+    		
+    	}
+    	
+    }
 }
+

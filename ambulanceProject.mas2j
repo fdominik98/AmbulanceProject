@@ -8,6 +8,7 @@ MAS ambulanceProject {
 		ambulance #4;
 		station #2;
 		hospital #2;
+		phoneCenter ;
 
 	aslSourcePath:
 		"src/asl";
