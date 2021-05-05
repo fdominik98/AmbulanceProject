@@ -9,9 +9,9 @@ import rescueframework.RescueFramework;
  */
 public class AStarSearch {
     // Open list of the nodes
-    static ArrayList<AStarCell> openList = new ArrayList<>();
+    private ArrayList<AStarCell> openList = new ArrayList<>();
     // Closed list of the nodes
-    static ArrayList<AStarCell> closedList = new ArrayList<>();
+    private  ArrayList<AStarCell> closedList = new ArrayList<>();
     
     /**
      * Find path between start and target no longer than maxDistance
@@ -22,7 +22,7 @@ public class AStarSearch {
      * @param color         Color of the path
      * @return              A Path if exists between start and target or NULL
      */
-    public static Path search(Cell start, Cell target, int maxDistance, Color color) {
+    public Path search(Cell start, Cell target, int maxDistance, Color color) {
         Path result = search(start,target, maxDistance);
         if (result != null) result.setColor(color);
         return result;
@@ -37,7 +37,7 @@ public class AStarSearch {
      * @param maxDistance   The maximum length of the path to consider
      * @return              A Path if exists between start and target or NULL
      */
-    public static Path search(Cell start, Cell target, int maxDistance) {
+    public Path search(Cell start, Cell target, int maxDistance) {
         // Disable console logging
         boolean verbose = false; 
         if (verbose) RescueFramework.log("AStarSearch between "+start.getX()+"x"+start.getY()+" and "+target.getX()+"x"+target.getY()+" max distance "+maxDistance);

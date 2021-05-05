@@ -10,6 +10,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import javax.imageio.ImageIO;
 import rescueframework.RescueFramework;
 
@@ -41,6 +43,7 @@ public class Map implements RobotPercepcion{
     // Simulation time
     private int time = 0;
     // Start cell specified for the robots
+
     private ArrayList<Cell> startCells = new ArrayList<>();
     
     /**
@@ -96,11 +99,12 @@ public class Map implements RobotPercepcion{
                     	int x = Integer.valueOf(array[1]);
                         int y = Integer.valueOf(array[2]);                        
                         Cell cell = getCell(x, y);
-                    	ArrayList<Ambulance> a = new ArrayList<>();
+                        CopyOnWriteArrayList<Ambulance> a = new CopyOnWriteArrayList<Ambulance>();
                     	for(int i = 0; i < ambulanceCount;i++)
                     		a.add(new Ambulance(cell,this));
                     	ambulances.addAll(a);
                     	Station s = new Station(cell,a);
+                    	RescueFramework.log(s.getId());
                     	stations.add(s);
                     	cell.setStation(s);
                     	
@@ -599,7 +603,7 @@ public class Map implements RobotPercepcion{
                 }
             }
             
-            Path p = getShortestExitPath(robot.getLocation());
+           /* Path p = getShortestExitPath(robot.getLocation());
             if (p != null) {
                 p.setColor(Color.GREEN);
                 displayPaths.add(p);
@@ -609,7 +613,7 @@ public class Map implements RobotPercepcion{
             if (p != null) {
                 p.setColor(Color.RED);
                 displayPaths.add(p);
-            } 
+            } */
         }
         //long end = System.currentTimeMillis();
         //RescueFramework.log("Robot decision time: "+(end-start)+" ms");
@@ -648,12 +652,13 @@ public class Map implements RobotPercepcion{
         }
         
         int bestLength = -1;
-        Path bestPath = AStarSearch.search(start, targetCells.get(0),-1);
+        AStarSearch asc = new AStarSearch();
+        Path bestPath = asc.search(start, targetCells.get(0),-1);
         if (bestPath != null) bestLength = bestPath.getLength();
         
         for (int i=1; i<targetCells.size(); i++) {
             
-            Path thisPath = AStarSearch.search(start, targetCells.get(i), bestLength);
+            Path thisPath = asc.search(start, targetCells.get(i), bestLength);
             if (thisPath != null && (bestPath == null || thisPath.getLength()<bestPath.getLength())) {
                 bestPath = thisPath;
                 bestLength = bestPath.getLength();
@@ -706,6 +711,20 @@ public class Map implements RobotPercepcion{
     }
     public void addInjured(Injured i) {
     	injureds.add(i);
+    }
+    public Ambulance getAmbulanceById(String id) {
+    	for(Ambulance a: ambulances) {
+    		if(a.getId().equals(id))
+    			return a;
+    	}
+    	return null;
+    }
+    public Station getStationById(String id) {
+    	for(Station s: stations) {
+    		if(s.getId().equals(id))
+    			return s;
+    	}
+    	return null;
     }
 
     

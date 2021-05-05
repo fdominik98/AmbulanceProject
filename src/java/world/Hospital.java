@@ -10,9 +10,9 @@ public class Hospital {
 
     private Cell location = null;
     // Static ID value of the next injured
-    private static int nextID = 1;
+    public static int nextID = 1;
     // ID of the injured object
-    private int id;
+    private String id;
 
     public Cell getLocation() {
         return location;
@@ -28,7 +28,7 @@ public class Hospital {
         this.capacity = capacity;
         
         // Generate unique ID
-        id = nextID;
+        id = "hospital" + nextID;
         nextID++;
     }
     
@@ -59,6 +59,9 @@ public class Hospital {
     }
     public boolean isFull() {
     	return injureds.size() >= capacity;
+    }
+    public String getId() {
+ 	   return id;
     }
     
     

@@ -8,7 +8,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import world.Map;
+import world.Station;
 import world.Ambulance;
+import world.Hospital;
 
 /**
  * Main frame of the simulator
@@ -53,8 +55,7 @@ public class MainFrame extends javax.swing.JFrame{
         jButton1ActionPerformed(null);
         jButton1.requestFocus();
         
-        // Load agent count and simulation speed
-        ambulanceSpinner.setValue(Settings.getInt("ambulance_per_station",1));
+        // Load agent count and simulation speed      
         jSlider1.setValue(Settings.getInt("speed",20));
         
         // Key listener for keyboard robot control
@@ -117,8 +118,7 @@ public class MainFrame extends javax.swing.JFrame{
         jButton1 = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();      
         coordLabel = new javax.swing.JLabel();
-        jSlider1 = new javax.swing.JSlider();
-        ambulanceSpinner = new javax.swing.JSpinner();
+        jSlider1 = new javax.swing.JSlider();        
         ambulanceLabel = new javax.swing.JLabel();
         hospitalSpinner = new javax.swing.JSpinner();
         hospitalLabel = new javax.swing.JLabel();
@@ -157,8 +157,7 @@ public class MainFrame extends javax.swing.JFrame{
             }
         });
 
-        ambulanceSpinner.setModel(new javax.swing.SpinnerNumberModel(1, 1, null, 1));
-        ambulanceSpinner.setFocusable(false);
+       
         hospitalSpinner.setModel(new javax.swing.SpinnerNumberModel(1, 1, null, 1));
         hospitalSpinner.setFocusable(false);
 
@@ -176,11 +175,7 @@ public class MainFrame extends javax.swing.JFrame{
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ambulanceLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ambulanceSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)         
                 .addComponent(hospitalLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(hospitalSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -212,9 +207,7 @@ public class MainFrame extends javax.swing.JFrame{
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                          .addComponent(jButton1)
                         .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel1)
-                        .addComponent(ambulanceSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(ambulanceLabel)     
+                        .addComponent(jLabel1)                        
                         .addComponent(hospitalSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(hospitalLabel)  
                         .addComponent(jLabel4)))
@@ -241,14 +234,16 @@ public class MainFrame extends javax.swing.JFrame{
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // Save selected map and agent count
         String map = jComboBox1.getSelectedItem()+"";
-        int ambulanceCount = (Integer)ambulanceSpinner.getValue();
+        int ambulanceCount = Settings.getInt("ambulance_per_station",2);
         int hospitalCapacity = (Integer)hospitalSpinner.getValue();
-        Settings.setString("map", map);
-        Settings.setInt("ambulance_per_station", ambulanceCount);
+        Settings.setString("map", map);        
         Settings.setInt("hospital_capacity", hospitalCapacity);
         
         // Load the map from file
         RescueFramework.map = new Map("maps/"+map, ambulanceCount, hospitalCapacity);
+        Ambulance.nextID = 1;
+        Hospital.nextID = 1;
+        Station.nextID = 1;
         
         // Update the GUI and disable autostep 
         if (stepThread != null) stepThread.disable();
@@ -304,8 +299,7 @@ public class MainFrame extends javax.swing.JFrame{
     private javax.swing.JLabel hospitalLabel;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JSlider jSlider1;
-    private javax.swing.JSpinner ambulanceSpinner;
+    private javax.swing.JSlider jSlider1;    
     private javax.swing.JSpinner hospitalSpinner;
     private rescueframework.PaintPanel paintPanel;
     // End of variables declaration//GEN-END:variables

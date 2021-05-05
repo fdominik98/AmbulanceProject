@@ -14,9 +14,12 @@ public class Ambulance {
     
     // The injured being carried by the robot
     private Injured injured = null;
+    private boolean allocated = false;
     private Station station = null;
     // The control object of th robot
     private AbstractRobotControl control;
+    public static int nextID = 1;
+    private String id;
     
     
     /**
@@ -28,6 +31,18 @@ public class Ambulance {
     public Ambulance(Cell startCell, RobotPercepcion percepcion) {
         location = startCell;
         control = new RobotControl(this, percepcion);
+     // Generate unique ID
+        id = "ambulance" + nextID;
+        nextID++;
+    }
+    public String getId() {
+ 	   return id;
+    }
+    public boolean isAllocated() {
+    	return allocated;
+    }
+    public void setAllocated(boolean a) {
+    	allocated = a;
     }
     public void setStation(Station s) {
     	station = s;
@@ -81,6 +96,7 @@ public class Ambulance {
     public Injured dropInjured() {
         RescueFramework.log("Dropping injured "+injured.toString()+" at "+location.toString());
         Injured result = injured;
+        allocated = false;
         injured = null;
         return result;
     }

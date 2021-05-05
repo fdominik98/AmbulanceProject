@@ -1,6 +1,7 @@
 package world;
 
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import rescueframework.RescueFramework;
 
@@ -8,13 +9,13 @@ public class Station {
 
 
 
-   private ArrayList<Ambulance> ambulances = new ArrayList<>();
+   private CopyOnWriteArrayList<Ambulance> ambulances = new CopyOnWriteArrayList<Ambulance>();
 
    private Cell location = null;
    // Static ID value of the next injured
-   private static int nextID = 1;
+   public static int nextID = 1;
    // ID of the injured object
-   private int id;
+   private String id;
 
    public Cell getLocation() {
        return location;
@@ -25,7 +26,7 @@ public class Station {
    }
    
 
-   public Station(Cell cell,ArrayList<Ambulance> a) {
+   public Station(Cell cell,CopyOnWriteArrayList<Ambulance> a) {
       for(Ambulance am : a) {
     	  am.setStation(this);
       }
@@ -33,8 +34,21 @@ public class Station {
     	  location = cell;
        
        // Generate unique ID
-       id = nextID;
+       id = "station" + nextID;
        nextID++;
+   }
+   public String getId() {
+	   return id;
+   }
+   public Ambulance getAmbulanceById(String id) {
+   	for(Ambulance a: ambulances) {
+   		if(a.getId().equals(id))
+   			return a;
+   	}
+   	return null;
+   }
+   public CopyOnWriteArrayList<Ambulance> getAmbulances(){
+	   return ambulances;
    }
 
 }
