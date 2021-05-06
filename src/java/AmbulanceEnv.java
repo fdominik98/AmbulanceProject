@@ -24,7 +24,7 @@ public class AmbulanceEnv extends Environment {
 	
     public static final Term    callCheck = Literal.parseLiteral("checkIfHas(call)"); 
     public static final Term    countStationBid = Literal.parseLiteral("countStation(bid)"); 
-    public static final Term    removePercepts = Literal.parseLiteral("remove(percepts)"); 
+
  
     
     private Logger logger = Logger.getLogger("ambulanceProject."+AmbulanceEnv.class.getName());
@@ -46,7 +46,7 @@ public class AmbulanceEnv extends Environment {
     }
 
     @Override
-    public boolean executeAction(String agName, Structure action) {    
+    public boolean executeAction(String agName, Structure action) {        
     	map = RescueFramework.getMap();       
         if (action.equals(callCheck)) { // you may improve this condition
         	callCheck(agName);
@@ -54,20 +54,28 @@ public class AmbulanceEnv extends Environment {
         else if(action.equals(countStationBid)) {          	
         	countStationBid(agName);          	
         }
-        else if(action.getFunctor().equals("countAmbulance")) {   
-        	 int x;
+        else if(action.getFunctor().equals("countAmbulance")) {       	
 			try {
-				x = (int)((NumberTerm)action.getTerm(0)).solve();
+				int x = (int)((NumberTerm)action.getTerm(0)).solve();
 				int y = (int)((NumberTerm)action.getTerm(1)).solve();
 				countAmbulanceBid(agName , x ,y );          	
 			} catch (NoValueException e) {
 				e.printStackTrace();
 			}
         }
-        else if(action.equals(removePercepts)) {
-        	clearPercepts();
-        	logger.info("percepts cleared");
-        } 
+        else if(action.getFunctor().equals("saveInjured")) {       	
+  			try {
+  				int x = (int)((NumberTerm)action.getTerm(0)).solve();
+  				int y = (int)((NumberTerm)action.getTerm(1)).solve();
+  				saveInjured(agName , x ,y ); 				
+  			} catch (NoValueException e) {
+  				e.printStackTrace();
+  			}
+          }
+        else if(action.getFunctor().equals("removePercept")) {    		
+        	LiteralImpl P = ((LiteralImpl)action.getTerm(0));    			   				     	
+ 				removePercept(agName,P);     		
+        }
         else {
         	return false;
         }
@@ -81,43 +89,82 @@ public class AmbulanceEnv extends Environment {
     }
     
     public void callCheck(String agName) {
-    	for(Injured i : map.getInjureds()) {
-    		if(!i.getBeingSaved()) {
-    			logger.info(agName + " received a call");
-    			addPercept(agName,Literal.parseLiteral("injured("+i.getLocation().getX()+","+i.getLocation().getY()+")"));
-    			i.beingSaved();
+    	for(int i = 0; i< map.getInjureds().size(); i++) {
+    		Injured injured = map.getInjureds().get(i);
+    		if(!injured.getBeingSaved()) {
+    			//logger.info(agName + " received a call");      
+    			removePercept(agName,Literal.parseLiteral("injured("+injured.getLocation().getX()+","+injured.getLocation().getY()+")"));
+    			addPercept(agName,Literal.parseLiteral("injured("+injured.getLocation().getX()+","+injured.getLocation().getY()+")"));
+    			//i.beingSaved();
     		}
     		
     	}    	
     }
     public void countStationBid(String agName) {   
-    	Station s = map.getStationById(agName);    	
-    	CopyOnWriteArrayList<Ambulance> as= s.getAmbulances();
-    	for(Ambulance a : as) {
-    		logger.info(a.getId()+" needed.");    		
-    		addPercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+")"));    	
+    	Station s = map.getStationById(agName);
+    	if(s != null) {    		
+    		CopyOnWriteArrayList<Ambulance> as= s.getAmbulances();
+    		for(Ambulance a : as) {
+    			//logger.info(a.getId()+" needed.");     	
+    			removePercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+")"));       
+    			addPercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+")"));        				
+    		}
     	}
 		
     }
-    public void countAmbulanceBid(String agName , int x, int y) {
-    	
+    public void countAmbulanceBid(String agName , int x, int y) {    	
     	  	
     	Cell injured = map.getCell(x, y);
     	Ambulance a = map.getAmbulanceById(agName);	
-    	if(a.isAllocated())
-    		 addPercept(agName,Literal.parseLiteral("bid("+1000000+")"));  
-    	else {    		
-    		logger.info(agName + ": "+a.getLocation().getX() + "," +a.getLocation().getY());
-    		AStarSearch asc = new AStarSearch();
-    		Path p = asc.search(a.getLocation(),injured,100000);
-    		if (p != null) {
-    			p.setColor(Color.RED);
-    			map.getDisplayPaths().add(p);
-    			logger.info(agName + " counted a bid: "+p.getLength());		
-    			addPercept(agName,Literal.parseLiteral("bid("+p.getLength()+")"));   
-    		}    	
+    	if(a != null) {
+    		if(a.isAllocated()) {  
+    			removePercept(agName,Literal.parseLiteral("bid("+1000000+")"));  
+    			addPercept(agName,Literal.parseLiteral("bid("+1000000+")"));  
+    		}
+    		else {    		
+	       		logger.info(agName + ": "+a.getLocation().getX() + "," +a.getLocation().getY());
+	       		AStarSearch asc = new AStarSearch();
+	       		Path p = asc.search(a.getLocation(),injured,-1);
+	       		if (p != null) {	       			
+	       		//	logger.info(agName + " counted a bid: "+p.getLength());	  
+	       			removePercept(agName,Literal.parseLiteral("bid("+p.getLength()+")"));
+	       			addPercept(agName,Literal.parseLiteral("bid("+p.getLength()+")"));  
+	       		}    	
+    		}   
     	}
-    	
+    	 	
+    }
+    public void saveInjured(String agName, int x, int y) {
+    	Cell injured = map.getCell(x, y);
+    	if(injured.getInjured()!= null) {
+    		Ambulance a = map.getAmbulanceById(agName);	
+    		if(a != null) {
+    			if(!a.isAllocated()) {
+    				injured.getInjured().beingSaved();
+    				a.setAllocated(true);    			
+    				AStarSearch asc = new AStarSearch();
+    				Path p = asc.search(a.getLocation(),injured,-1);
+    				for(int i = 0; i<p.getLength();i++) {
+    					map.moveRobot(a, p.getPath().get(i));
+    					map.stepTime();
+    					try {
+    						Thread.sleep(Ambulance.getSpeed());
+    					} catch (InterruptedException e) {
+    						// TODO Auto-generated catch block
+    						e.printStackTrace();
+    					}   					
+    				}
+    			      // Pick up new injured
+    		        if (a.getLocation().hasInjured()) {    		            
+    		                a.getLocation().getInjured().setLocation(null);
+    		                a.pickupInjured();    		           
+    		        }else {
+    		        	a.setAllocated(false);
+    		        }
+    				
+    			}    		
+    		}    		
+    	}    	
     }
     
 }

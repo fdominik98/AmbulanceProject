@@ -18,9 +18,19 @@ public class Ambulance {
     private Station station = null;
     // The control object of th robot
     private AbstractRobotControl control;
-    public static int nextID = 1;
+    private static int nextID = 1;
     private String id;
+    private static int speed;
     
+    public static void setSpeed(int i) {
+    	speed = i;
+    }
+    public static int getSpeed() {
+    	return speed;
+    }
+    public static void resetNextId() {
+    	nextID = 1;
+    }
     
     /**
      * Default constructor

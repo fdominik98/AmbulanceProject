@@ -13,14 +13,16 @@ public class Station {
 
    private Cell location = null;
    // Static ID value of the next injured
-   public static int nextID = 1;
+   private static int nextID = 1;
    // ID of the injured object
    private String id;
 
    public Cell getLocation() {
        return location;
    }
-
+   public static void resetNextId() {
+   	nextID = 1;
+   }
    public void setLocation(Cell location) {
        this.location = location;
    }

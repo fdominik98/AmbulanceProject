@@ -10,10 +10,13 @@ public class Hospital {
 
     private Cell location = null;
     // Static ID value of the next injured
-    public static int nextID = 1;
+    private static int nextID = 1;
     // ID of the injured object
     private String id;
 
+    public static void resetNextId() {
+    	nextID = 1;
+    }
     public Cell getLocation() {
         return location;
     }

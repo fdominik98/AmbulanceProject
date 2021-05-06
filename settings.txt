@@ -1,7 +1,7 @@
-#Wed May 05 03:04:37 CEST 2021
+#Thu May 06 18:12:35 CEST 2021
 heiht=940
-top=450
-left=-254
+top=135
+left=185
 ambulance_per_station=2
 maximized=0
 width=1200

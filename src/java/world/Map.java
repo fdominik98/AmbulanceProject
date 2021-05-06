@@ -44,6 +44,7 @@ public class Map implements RobotPercepcion{
     private int time = 0;
     // Start cell specified for the robots
 
+  
     private ArrayList<Cell> startCells = new ArrayList<>();
     
     /**
@@ -103,8 +104,7 @@ public class Map implements RobotPercepcion{
                     	for(int i = 0; i < ambulanceCount;i++)
                     		a.add(new Ambulance(cell,this));
                     	ambulances.addAll(a);
-                    	Station s = new Station(cell,a);
-                    	RescueFramework.log(s.getId());
+                    	Station s = new Station(cell,a);                    	
                     	stations.add(s);
                     	cell.setStation(s);
                     	
@@ -324,248 +324,22 @@ public class Map implements RobotPercepcion{
         }
         
         // Change location
-        robot.setCell(cell);
-        
-        // Pick up new injured
-        if (cell.hasInjured()) {
-            if (!robot.hasInjured()) {
-                cell.getInjured().setLocation(null);
-                robot.pickupInjured();
-            } else {
-                RescueFramework.log("Move failed: "+cell.getX()+" x "+cell.getY()+" is occupied by an injured, and the robot is also carrying one.");
-                return false;
-            }
-        }
+        robot.setCell(cell);        
+  
         
         // Update robot visibility and GUI       
         RescueFramework.refresh();
         return true;
-    }
-    
+    }   
    
-    
-    /**
-     * Check visibility between two points in the X+ direction
-     * @param x1_in     First point X coordinate
-     * @param y1_in     First point Y coordinate
-     * @param x2_in     Second point X coordinate
-     * @param y2_in     Second point Y coordinate
-     * @return          True if there is no wall in the way
-     */
-    public boolean checkCellVisibilityXPlus(int x1_in, int y1_in, int x2_in, int y2_in) {
-        boolean logging = false;
-        if (logging) RescueFramework.log("-------- Visibility check between "+x1_in+" x "+y1_in+" and "+x2_in+" x "+y2_in);
-        
-        double dx, dy, a, b;
-        
-        double x1 = x1_in + 0.5;
-        double y1 = y1_in + 0.5;
-        double x2 = x2_in + 0.5;
-        double y2 = y2_in + 0.5;
-        
-        // y = a*x+b
-        // x = (y-b)/a
-        dx = x2-x1;
-        dy = y2-y1;
-        if (dx!=0) {
-            a = (double)dy/(double)dx;
-        } else {
-            a = 0;
-        }
-        b = (double)y1-((double)x1*(double)a);
-        
-        int ydir = -1;
-        if (y1<y2) ydir = 1;
-        if (logging) RescueFramework.log("dx = "+dx+" dy = "+dy+";   "+b+" = "+y1+"-"+x1+"*"+a+";   y = "+a+"*x+"+b+";   x = (y-"+b+")/"+a+";   ydir="+ydir);
-        if (logging) RescueFramework.log("Horizontal and corner check...");
-        
-        int xCell, yCell;
-        double xx = 0, yy = 0;
-        // Vertical wall test (only for non vertical lines)
-        if (dx != 0) {
-            xCell = x1_in+1;
-            while (xCell <= x2_in) {
-                yy = a*xCell+b;
-                
-                if (Math.abs(yy-Math.round(yy))<0.01) {
-                    // Corner crossing
-                    yCell = (int)Math.round(yy);
-                    if (logging) RescueFramework.log("Checking x = "+xCell+" -> y="+yy+" -> corner crossing ("+yCell+")");
-                    
-                    if (ydir>0) {
-                        // Direction \
-                        if (cells[xCell-1][yCell-1].hasWall(1) && cells[xCell-1][yCell-1].hasWall(2)) {
-                            if (logging) {
-                                RescueFramework.log("Bottom right corner hit of "+(xCell-1)+" x "+(yCell-1));
-                                viewLineBreakPoints.add(new ViewLineBreakPoint(xCell,yy,Color.BLUE));
-                            }
-                            return false;
-                        } else if (cells[xCell][yCell].hasWall(0) && cells[xCell][yCell].hasWall(3)) {
-                            if (logging) {
-                                RescueFramework.log("Top left corner hit of "+(xCell)+" x "+(yCell));
-                                viewLineBreakPoints.add(new ViewLineBreakPoint(xCell,yy,Color.CYAN));
-                            }
-                            return false;
-                        } else if (cells[xCell-1][yCell-1].hasWall(1) && cells[xCell][yCell].hasWall(3)) {
-                            if (logging) {
-                                RescueFramework.log("Vertical wall hit on "+xCell+" x "+yCell);
-                                viewLineBreakPoints.add(new ViewLineBreakPoint(xCell,yy,Color.YELLOW));
-                            }
-                            return false;
-                        } else if (cells[xCell-1][yCell].hasWall(0) && cells[xCell][yCell].hasWall(0)) {
-                            if (logging) {
-                                RescueFramework.log("Horizontal wall hit on "+xCell+" x "+yCell);
-                                viewLineBreakPoints.add(new ViewLineBreakPoint(xCell,yy,Color.YELLOW));
-                            }
-                            return false;
-                        }
-                    } else {
-                        // Direction /
-                        if (cells[xCell-1][yCell].hasWall(0) && cells[xCell-1][yCell].hasWall(1)) {
-                            if (logging) {
-                                RescueFramework.log("Top right corner hit of "+(xCell-1)+" x "+(yCell));
-                                viewLineBreakPoints.add(new ViewLineBreakPoint(xCell,yy,Color.BLUE));
-                            }
-                            return false;
-                        } else if (cells[xCell][yCell-1].hasWall(2) && cells[xCell][yCell-1].hasWall(3)) {
-                            if (logging) {
-                                RescueFramework.log("Bottom left corner hit of "+(xCell)+" x "+(yCell-1));
-                                viewLineBreakPoints.add(new ViewLineBreakPoint(xCell,yy,Color.CYAN));
-                            }
-                            return false;
-                        } else if (cells[xCell][yCell].hasWall(3) && cells[xCell][yCell-1].hasWall(3)) {
-                            if (logging) {
-                                RescueFramework.log("Vertical wall hit on "+xCell+" x "+yCell);
-                                viewLineBreakPoints.add(new ViewLineBreakPoint(xCell,yy,Color.YELLOW));
-                            }
-                            return false;
-                        } else if (cells[xCell-1][yCell].hasWall(0) && cells[xCell][yCell].hasWall(0)) {
-                            if (logging) {
-                                RescueFramework.log("Horizontal wall hit on "+xCell+" x "+yCell);
-                                viewLineBreakPoints.add(new ViewLineBreakPoint(xCell,yy,Color.YELLOW));
-                            }
-                            return false;
-                        }
-                    }
-                } else {
-                    // Wall crossing
-                    yCell = (int)Math.floor(yy);
-                    if (logging) RescueFramework.log("Checking x = "+xCell+" -> y="+yy+" -> regular crossing. ("+yCell+")"); 
-                    
-                    if (cells[xCell][yCell].hasWall(3)) {
-                        if (logging) {
-                            RescueFramework.log("Vertical wall hit at x = "+xCell+" -> y="+yy); 
-                            viewLineBreakPoints.add(new ViewLineBreakPoint(xCell,yy,Color.RED));
-                        }
-                        return false;
-                    }
-                }
-                
-                xCell++;
-            }
-        } else {
-            if (logging) RescueFramework.log("Skipping horizontal line.");
-        }
-        
-        // Horizontal wall test (only for non vertical lines) 
-        if (logging) RescueFramework.log("Vertical check...");
-        if (dy != 0) {  
-            if (ydir>0) {
-                // Direction \
-                
-                yCell = y1_in+1;
-                while (yCell <= y2_in) {
-                    if (a != 0) {
-                        xx = (yCell-b)/a;
-                    } else {
-                        xx = x1_in+0.5;
-                    }
 
-                    xCell = (int)Math.floor(xx);
-                    if (logging) RescueFramework.log("Checking y="+yCell+" -> x = "+xx+" -> regular crossing. ("+xCell+" x "+yCell+")"); 
-                    
-                    if (Math.abs(xCell-xx)>0.01) {
-                        if (cells[xCell][yCell].hasWall(0)) {
-                            if (logging) {
-                                RescueFramework.log("Top wall hit on "+xCell+" x "+yCell);
-                                viewLineBreakPoints.add(new ViewLineBreakPoint(xx,yCell,Color.lightGray));
-                            }
-                            return false;
-                        }
-                    }
-                    
-                    yCell++;
-                }
-                
-            } else {
-                // Direction /
-                
-                yCell = y1_in;
-                while (yCell > y2_in) {
-                    if (a != 0) {
-                        xx = (yCell-b)/a;
-                    } else {
-                        xx = x1_in+0.5;
-                    }
-
-                    xCell = (int)Math.floor(xx);
-                    if (logging) RescueFramework.log("Checking y="+yCell+" -> x = "+xx+" -> regular crossing. ("+xCell+" x "+yCell+")"); 
-                    
-                    if (Math.abs(xCell-xx)>0.001) {
-                        if (cells[xCell][yCell].hasWall(0)) {
-                            if (logging) {
-                                RescueFramework.log("Bottom wall hit on "+xCell+" x "+yCell);
-                                viewLineBreakPoints.add(new ViewLineBreakPoint(xx,yCell,Color.lightGray));
-                            }
-                            
-                            return false;
-                        }
-                    }
-                    yCell--;
-                }
-            }
-        } else {
-            if (logging) RescueFramework.log("Skipping vertical line.");
-        }    
-        
-        return true;
-    }
-    
-        /**
-     * Check visibility between two points
-     * @param x1_in     First point X coordinate
-     * @param y1_in     First point Y coordinate
-     * @param x2_in     Second point X coordinate
-     * @param y2_in     Second point Y coordinate
-     * @return          True if there is no wall in the way
-     */
-    public boolean checkCellVisibility(int x1_in, int y1_in, int x2_in, int y2_in) {
-        // The cell always sees itself
-        if (x1_in == x2_in && y1_in == y2_in) return true;
-        
-        // Points above each other
-        if (x1_in == x2_in) {
-            if (y1_in<y2_in) {
-                return checkCellVisibilityXPlus(x1_in, y1_in, x2_in, y2_in);
-            } else {
-                return checkCellVisibilityXPlus(x2_in, y2_in, x1_in, y1_in);
-            }
-        } 
-        
-        // Points next to each other
-        if (x1_in<=x2_in) {
-            return checkCellVisibilityXPlus(x1_in, y1_in, x2_in, y2_in);
-        } else {
-            return checkCellVisibilityXPlus(x2_in, y2_in, x1_in, y1_in);
-        }
-    }
     
     /**
      * Make one step in time
      * 
      * @param stepRobots            If true robots are requetsed to step
      */
-    public void stepTime(boolean stepRobots) {
+    public void stepTime() {
         time++;
         RescueFramework.log(" ---  Step "+time+"");
         
@@ -585,47 +359,8 @@ public class Map implements RobotPercepcion{
         }
         
         // Display robot paths
-        displayPaths.clear();
-        //long start = System.currentTimeMillis();
-        boolean movingRobot = false;
-        for (int i=0; i<ambulances.size(); i++) {
-            Ambulance robot = ambulances.get(i);
-            
-            if (stepRobots) {
-                Integer stepDir = robot.step();
-                if (stepDir == null) {
-                    RescueFramework.log("R"+i+" @ "+robot.getLocation().toString()+" -> sleep");
-                } else {
-                    RescueFramework.log("R"+i+" @ "+robot.getLocation().toString()+" -> "+stepDir);
-                    if (moveRobot(robot, stepDir)) {
-                        movingRobot = true;
-                    }
-                }
-            }
-            
-           /* Path p = getShortestExitPath(robot.getLocation());
-            if (p != null) {
-                p.setColor(Color.GREEN);
-                displayPaths.add(p);
-            }            
-           
-            p = getShortestInjuredPath(ambulances.get(i).getLocation());
-            if (p != null) {
-                p.setColor(Color.RED);
-                displayPaths.add(p);
-            } */
-        }
-        //long end = System.currentTimeMillis();
-        //RescueFramework.log("Robot decision time: "+(end-start)+" ms");
-        
-        if (stepRobots && !movingRobot) {
-            RescueFramework.log("No moving robot. Pausing simulation.");         
-        }
-        
-        if (stepRobots && (injureds.size() == savedInjureds.size())) {
-            RescueFramework.log("All injuredare outside. Pausing simulation.");       
-        }
-        
+        displayPaths.clear();  
+
         RescueFramework.refresh();
     }
     

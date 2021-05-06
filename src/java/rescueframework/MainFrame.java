@@ -11,13 +11,12 @@ import world.Map;
 import world.Station;
 import world.Ambulance;
 import world.Hospital;
+import world.Injured;
 
 /**
  * Main frame of the simulator
  */
 public class MainFrame extends javax.swing.JFrame{
-    // Auto step thread of the frame
-    private StepThread stepThread;
     
     /**
      * Creates new form MainFrame
@@ -79,11 +78,8 @@ public class MainFrame extends javax.swing.JFrame{
                 Settings.setInt("width", getWidth());
                 Settings.setInt("height", getHeight());
             }
-        });
-        
-        // Create and start autostep thread
-        stepThread = new StepThread();
-        stepThread.start();
+        });        
+  
     }
     
     /**
@@ -241,15 +237,11 @@ public class MainFrame extends javax.swing.JFrame{
         
         // Load the map from file
         RescueFramework.map = new Map("maps/"+map, ambulanceCount, hospitalCapacity);
-        Ambulance.nextID = 1;
-        Hospital.nextID = 1;
-        Station.nextID = 1;
+        Ambulance.resetNextId();
+        Hospital.resetNextId();
+        Station.resetNextId();
         
-        // Update the GUI and disable autostep 
-        if (stepThread != null) stepThread.disable();
-        refresh();
-        if (stepThread != null)
-        	stepThread.enable();
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
@@ -269,13 +261,10 @@ public class MainFrame extends javax.swing.JFrame{
      * 
      * @param evt   The change event
      */
-    private void jSlider1StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSlider1StateChanged
-        if (stepThread != null) {
-            // Update the simulation speed of the stepThread
-            stepThread.setStepTime(getSimulationSpeed());
-            // Save speed settings
+    private void jSlider1StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSlider1StateChanged        
+    		Ambulance.setSpeed(getSimulationSpeed());
             Settings.setInt("speed", jSlider1.getValue());
-        }
+        
     }//GEN-LAST:event_jSlider1StateChanged
 
     /**
@@ -324,8 +313,11 @@ public class MainFrame extends javax.swing.JFrame{
                     Ambulance r = RescueFramework.map.getRobots().get(0);
                     if (r != null) {
                         RescueFramework.map.moveRobot(r,dir);
-                        RescueFramework.map.stepTime(false);
+                        RescueFramework.map.stepTime();
                     }                  
+                }
+                for(Injured i : RescueFramework.map.getInjureds()) {
+                	RescueFramework.log(i.getBeingSaved() + " ");
                 }
             } 
             return false;
@@ -337,6 +329,6 @@ public class MainFrame extends javax.swing.JFrame{
      * @return     The 3-103 sleep time for the StepThread
      */
     public int getSimulationSpeed() {
-        return (100-jSlider1.getValue())+3;
+        return (200-jSlider1.getValue())+3;
     }
 }

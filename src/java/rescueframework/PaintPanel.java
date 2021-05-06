@@ -331,7 +331,7 @@ public class PaintPanel extends JPanel{
            c.setInjured(i);
            i.setLocation(c);
            RescueFramework.map.addInjured(i);
-           RescueFramework.map.stepTime(false);
+           RescueFramework.map.stepTime();
         }
     }
     

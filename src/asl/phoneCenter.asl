@@ -11,11 +11,15 @@
       
 +!check(calls)  <-	
     checkIfHas(call);
-      !check(calls).    
+      !check(calls).  
+ 
 
 +injured(X,Y) <- 
+		//.print("found injured at: ",X,";",Y);
        .send(station1, tell, injured(X,Y));
-		.send(station2, tell, injured(X,Y)).
+		.send(station2, tell, injured(X,Y));
+		removePercept(injured(X,Y)).	
+
       
 +bid(Injured,D,Ag)
   :  .count(bid(Injured,_,_),2)  // two bids were received
@@ -29,7 +33,7 @@
 +!allocate_station(Injured)
   <-  .findall(op(Dist,A),bid(Injured,Dist,A),LD);
      .min(LD,op(DistCloser,Closer));
-    // DistCloser < 10000;
+      DistCloser < 1000000;
      .print("Injured ",Injured," was allocated to ",Closer, " options were ",LD);
      .send(Closer,tell,allocated(Injured)).     
    
