@@ -7,6 +7,7 @@ import rescueframework.RescueFramework;
 import world.AStarSearch;
 import world.Ambulance;
 import world.Cell;
+import world.Hospital;
 import world.Injured;
 import world.Map;
 import world.Path;
@@ -19,13 +20,7 @@ import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.*;
 
-public class AmbulanceEnv extends Environment {
-
-	
-    public static final Term    callCheck = Literal.parseLiteral("checkIfHas(call)"); 
-    public static final Term    countStationBid = Literal.parseLiteral("countStation(bid)"); 
-
- 
+public class AmbulanceEnv extends Environment { 
     
     private Logger logger = Logger.getLogger("ambulanceProject."+AmbulanceEnv.class.getName());
     private Map map;
@@ -46,13 +41,20 @@ public class AmbulanceEnv extends Environment {
     }
 
     @Override
-    public boolean executeAction(String agName, Structure action) {        
+    public boolean executeAction(String agName, Structure action) {   	
+    	
     	map = RescueFramework.getMap();       
-        if (action.equals(callCheck)) { // you may improve this condition
+        if (action.getFunctor().equals("checkIfHas")) { // you may improve this condition        	
         	callCheck(agName);
         }
-        else if(action.equals(countStationBid)) {          	
-        	countStationBid(agName);          	
+        else if(action.getFunctor().equals("countStation")) {          	
+        	try {
+				int x = (int)((NumberTerm)action.getTerm(0)).solve();
+				int y = (int)((NumberTerm)action.getTerm(1)).solve();
+				countStationBid(agName , x ,y );          	
+			} catch (NoValueException e) {
+				e.printStackTrace();
+			}         	
         }
         else if(action.getFunctor().equals("countAmbulance")) {       	
 			try {
@@ -63,6 +65,19 @@ public class AmbulanceEnv extends Environment {
 				e.printStackTrace();
 			}
         }
+        else if(action.getFunctor().equals("countHospital")) {       	
+			try {
+				int x = (int)((NumberTerm)action.getTerm(0)).solve();
+				int y = (int)((NumberTerm)action.getTerm(1)).solve();
+				countHospitalBid(agName , x ,y );          	
+			} catch (NoValueException e) {
+				e.printStackTrace();
+			}
+        }
+        else if(action.getFunctor().equals("goToHospital")) {         			
+  				String h = ((Atom)action.getTerm(0)).toString(); 
+  				takeInjuredToHospital(agName,h);
+          }
         else if(action.getFunctor().equals("saveInjured")) {       	
   			try {
   				int x = (int)((NumberTerm)action.getTerm(0)).solve();
@@ -100,14 +115,14 @@ public class AmbulanceEnv extends Environment {
     		
     	}    	
     }
-    public void countStationBid(String agName) {   
+    public void countStationBid(String agName, int x, int y) {   
     	Station s = map.getStationById(agName);
     	if(s != null) {    		
     		CopyOnWriteArrayList<Ambulance> as= s.getAmbulances();
     		for(Ambulance a : as) {
     			//logger.info(a.getId()+" needed.");     	
-    			removePercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+")"));       
-    			addPercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+")"));        				
+    			removePercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+","+x+","+y+")"));       
+    			addPercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+","+x+","+y+")"));     			
     		}
     	}
 		
@@ -130,6 +145,29 @@ public class AmbulanceEnv extends Environment {
 	       			removePercept(agName,Literal.parseLiteral("bid("+p.getLength()+")"));
 	       			addPercept(agName,Literal.parseLiteral("bid("+p.getLength()+")"));  
 	       		}    	
+    		}   
+    	}
+    	 	
+    }
+    public void countHospitalBid(String agName , int x, int y) {    	
+	  	
+    	Cell injured = map.getCell(x, y);
+    	Hospital h = map.getHospitalById(agName);	
+    	if(h != null) {
+    		int bid = 0;
+    		if(h.isFull()) {  
+    			bid += 100000;
+    		}
+    		   		
+       		logger.info(agName + ": "+h.getLocation().getX() + "," +h.getLocation().getY());
+       		AStarSearch asc = new AStarSearch();
+       		Path p = asc.search(h.getLocation(),injured,-1);
+       		if (p != null) {	      
+       			bid += p.getLength();
+       		//	logger.info(agName + " counted a bid: "+p.getLength());	  
+	       	    	
+       		removePercept(agName,Literal.parseLiteral("bid("+bid+")"));
+       		addPercept(agName,Literal.parseLiteral("bid("+bid+")"));  
     		}   
     	}
     	 	
@@ -157,7 +195,9 @@ public class AmbulanceEnv extends Environment {
     			      // Pick up new injured
     		        if (a.getLocation().hasInjured()) {    		            
     		                a.getLocation().getInjured().setLocation(null);
-    		                a.pickupInjured();    		           
+    		                a.pickupInjured();    	
+    		                searchForHospital(agName, a.getLocation());
+    		                map.stepTime();
     		        }else {
     		        	a.setAllocated(false);
     		        }
@@ -165,6 +205,48 @@ public class AmbulanceEnv extends Environment {
     			}    		
     		}    		
     	}    	
+    }
+    public void searchForHospital(String agName, Cell loc) {
+    	for(Hospital h : map.getHospitals()) {
+    		removePercept(agName,Literal.parseLiteral("neededHospital("+h.getId()+","+loc.getX()+","+loc.getY()+")"));       
+			addPercept(agName,Literal.parseLiteral("neededHospital("+h.getId()+","+loc.getX()+","+loc.getY()+")"));        			
+    	}
+    	
+    }
+    public void takeInjuredToHospital(String agName, String hospital){
+    	Hospital h = map.getHospitalById(hospital);
+    	Ambulance a = map.getAmbulanceById(agName);
+    	if(h!= null && a != null) {
+    		AStarSearch asc = new AStarSearch();
+			Path p = asc.search(a.getLocation(),h.getLocation(),-1);
+			for(int i = 0; i<p.getLength();i++) {
+				map.moveRobot(a, p.getPath().get(i));
+				map.stepTime();
+				try {
+					Thread.sleep(Ambulance.getSpeed());
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}   					
+			}		
+	        
+	        if (a.hasInjured() && a.getLocation().getHospital()!= null) {
+	        
+        		while(true) {
+        			if(!h.isFull()) {
+        				Injured savedInjured = a.dropInjured();
+        				savedInjured.setSaved();
+        				h.addInjured(savedInjured);
+        				map.getSavedInjureds().add(savedInjured);
+        				map.stepTime();
+        				break;
+        			}			      
+        		} 	       		
+	        	
+	        	removePercept(agName,Literal.parseLiteral("ambulanceReleased("+agName+")"));       
+				addPercept(agName,Literal.parseLiteral("ambulanceReleased("+agName+")"));  
+	        }
+    	}
     }
     
 }

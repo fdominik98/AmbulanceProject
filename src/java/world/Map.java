@@ -129,7 +129,7 @@ public class Map implements RobotPercepcion{
                         int injuries;
                         if (array.length>=4) {
                             // Load health level from file
-                            injuries = Integer.valueOf(array[3]);
+                            injuries = Integer.valueOf(array[3])*ambulances.size();
                         } else {
                             // Generate random health level
                             injuries = (int)((float)Math.random()*1000F);
@@ -310,18 +310,8 @@ public class Map implements RobotPercepcion{
         if (cell.hasObstacle()) {
             RescueFramework.log("Move failed: "+cell.getX()+" x "+cell.getY()+" is occupied by an obstacle.");
             return false;
-        }
-        
-        // Drop injured on hospital
-        Hospital h = cell.getHospital();
-        if (h != null && robot.hasInjured()) {
-        	if(!h.isFull()) {
-		        Injured savedInjured = robot.dropInjured();
-		        savedInjured.setSaved();
-		        h.addInjured(savedInjured);
-		        savedInjureds.add(savedInjured);
-        	}    
-        }
+        }       
+       
         
         // Change location
         robot.setCell(cell);        
@@ -330,7 +320,10 @@ public class Map implements RobotPercepcion{
         // Update robot visibility and GUI       
         RescueFramework.refresh();
         return true;
-    }   
+    }  
+    public ArrayList<Hospital> getHospitals(){
+    	return hospitals;
+    }
    
 
     
@@ -365,7 +358,7 @@ public class Map implements RobotPercepcion{
     }
     
     public int getTime() {
-        return time;
+        return time/ambulances.size();
     }
     
     public Cell getPathFirstCell(Cell from, Cell to) {
@@ -454,10 +447,20 @@ public class Map implements RobotPercepcion{
     	}
     	return null;
     }
+    public int getAmbulanceNumber() {
+    	return ambulances.size();
+    }
     public Station getStationById(String id) {
     	for(Station s: stations) {
     		if(s.getId().equals(id))
     			return s;
+    	}
+    	return null;
+    }
+    public Hospital getHospitalById(String id) {
+    	for(Hospital h: hospitals) {
+    		if(h.getId().equals(id))
+    			return h;
     	}
     	return null;
     }

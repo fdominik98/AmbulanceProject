@@ -12,14 +12,16 @@
 
 
 +injured(X,Y)[source(A)] :  A \== self
-	<-	 countStation(bid);
-		removePercept(injured(X,Y)[source(A)]).
+	<-//.print("found injured at: ",X,";",Y, " from ",A);	
+	 countStation(X,Y);
+	-injured(X,Y)[source(A)].
+		
 
  
- +neededAmbulance(A) <- ?injured(X,Y);
- 			.print("sending to ambulances");
+ +neededAmbulance(A, X, Y) <- 
+ 			//.print("sending to ambulances");
 			.send(A, tell, injured(X,Y));
-			removePercept(neededAmbulance(A)).
+			-neededAmbulance(A,X,Y).	
 			
 			 
 			 

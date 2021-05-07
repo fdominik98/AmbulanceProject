@@ -39,3 +39,7 @@
    
 -!allocate_station(Injured)
   <- .print("could not allocate injured ",Injured).
+  
++check(B)[source(A)]
+ <- !check(calls);
+ removePercept(check(B)[source(A)]).

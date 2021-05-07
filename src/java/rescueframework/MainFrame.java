@@ -315,10 +315,7 @@ public class MainFrame extends javax.swing.JFrame{
                         RescueFramework.map.moveRobot(r,dir);
                         RescueFramework.map.stepTime();
                     }                  
-                }
-                for(Injured i : RescueFramework.map.getInjureds()) {
-                	RescueFramework.log(i.getBeingSaved() + " ");
-                }
+                }               
             } 
             return false;
         }
