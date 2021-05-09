@@ -1,11 +1,11 @@
-#Fri May 07 18:34:02 CEST 2021
+#Sun May 09 03:18:28 CEST 2021
 heiht=940
-top=74
-left=125
+top=106
+left=150
 ambulance_per_station=2
 maximized=0
 width=1200
 hospital_capacity=1
 map=Default.txt
-speed=0
+speed=66
 height=1294

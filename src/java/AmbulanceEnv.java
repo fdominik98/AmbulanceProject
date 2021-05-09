@@ -32,12 +32,8 @@ public class AmbulanceEnv extends Environment {
     /** Called before the MAS execution with the args informed in .mas2j */
     @Override
     public void init(String[] args) {
-        super.init(args);        
-        try {
-			addPercept(ASSyntax.parseLiteral("percept(demo)"));
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+        super.init(args);       
+       
     }
 
     @Override
@@ -110,7 +106,7 @@ public class AmbulanceEnv extends Environment {
     			//logger.info(agName + " received a call");      
     			removePercept(agName,Literal.parseLiteral("injured("+injured.getLocation().getX()+","+injured.getLocation().getY()+")"));
     			addPercept(agName,Literal.parseLiteral("injured("+injured.getLocation().getX()+","+injured.getLocation().getY()+")"));
-    			//i.beingSaved();
+    			//injured.beingSaved();
     		}
     		
     	}    	
@@ -130,13 +126,10 @@ public class AmbulanceEnv extends Environment {
     public void countAmbulanceBid(String agName , int x, int y) {    	
     	  	
     	Cell injured = map.getCell(x, y);
-    	Ambulance a = map.getAmbulanceById(agName);	
-    	if(a != null) {
-    		if(a.isAllocated()) {  
-    			removePercept(agName,Literal.parseLiteral("bid("+1000000+")"));  
-    			addPercept(agName,Literal.parseLiteral("bid("+1000000+")"));  
-    		}
-    		else {    		
+    	Ambulance a = map.getAmbulanceById(agName);
+    	
+    	if(a != null) {    		
+    		if(!a.isAllocated()) {    		
 	       		logger.info(agName + ": "+a.getLocation().getX() + "," +a.getLocation().getY());
 	       		AStarSearch asc = new AStarSearch();
 	       		Path p = asc.search(a.getLocation(),injured,-1);
@@ -144,9 +137,12 @@ public class AmbulanceEnv extends Environment {
 	       		//	logger.info(agName + " counted a bid: "+p.getLength());	  
 	       			removePercept(agName,Literal.parseLiteral("bid("+p.getLength()+")"));
 	       			addPercept(agName,Literal.parseLiteral("bid("+p.getLength()+")"));  
+	       			return;
 	       		}    	
     		}   
     	}
+    	removePercept(agName,Literal.parseLiteral("bid("+1000000+")"));  
+		addPercept(agName,Literal.parseLiteral("bid("+1000000+")")); 
     	 	
     }
     public void countHospitalBid(String agName , int x, int y) {    	
