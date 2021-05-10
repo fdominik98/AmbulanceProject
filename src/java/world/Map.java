@@ -19,30 +19,7 @@ import rescueframework.RescueFramework;
  * The map representing the state of the world
  */
 public class Map implements RobotPercepcion{
-	public class Mythread implements Runnable
-	{
-		Map map;
-		boolean stoped;
-		public Mythread(Map _map) {
-			map=_map;
-			stoped=false;
-		}
-		@Override
-		public void run() 
-		{
-			while(stoped) 
-				{
-				map.stepTime();
-				try {Thread.sleep(100);} 
-				catch (InterruptedException e) {e.printStackTrace();}
-				}
-		}
-		public void stop() {
-			stoped=true;
-		}
-		
-		
-	}
+
     // Cell matrix of the map
     private Cell cells[][];
     // Dimensions of the map
@@ -356,8 +333,9 @@ public class Map implements RobotPercepcion{
      * 
      * @param stepRobots            If true robots are requetsed to step
      */
-    public void stepTime() {
-        time++;
+    public void stepTime(boolean incTime) {
+    	if(incTime)
+    		time++;
         RescueFramework.log(" ---  Step "+time+"");
         
         for(Hospital h : hospitals)
@@ -382,7 +360,7 @@ public class Map implements RobotPercepcion{
     }
     
     public int getTime() {
-        return time/ambulances.size();
+        return time;
     }
     
     public Cell getPathFirstCell(Cell from, Cell to) {

@@ -17,16 +17,15 @@ started.
 	.findall(B,ambul(B),LP);
 	.print(LP);
 	 countStation(X,Y);
-	-injured(X,Y)[source(A)];
-	removePercept(injured(X,Y)[source(A)]).
+	-injured(_,_)[source(_)].
 		
 
  
  +neededAmbulance(A, X, Y) <- 
  			//.print("sending to ambulances");
 			.send(A, tell, injured(X,Y));
-			-neededAmbulance(A,X,Y);
-			removePercept(neededAmbulance(A,X,Y)).
+			-neededAmbulance(_,_,_)[source(percept)].
+			
 
 +remove(injured(X,Y))
 <-
@@ -38,7 +37,7 @@ started.
 +plesremove(injured(X,Y))
 <-
 	.send("phoneCenter", tell,plesremove(injured(X,Y)) );
-	-plesremove(injured(X,Y))[source(_)].	
+	-plesremove(injured(_,_))[source(_)].	
 			 
 			 
 +ambulanceBid(Injured,D,Ag)
@@ -56,15 +55,14 @@ started.
   		.findall(op(Dist,A),ambulanceBid(Injured,Dist,A),LD);
      .min(LD,op(DistCloser,Closer));   
      .print("Injured ",Injured," was allocated to ",Closer, " options were ",LD);
-     .send(phoneCenter,tell,stationBid(Injured,DistCloser,Me));
-     +closer(Closer).
+     .send(phoneCenter,tell,stationBid(Injured,DistCloser,Me,Closer)).     
 
   
-+allocated(Injured) 
- <- ?closer(Closer);
- .send(Closer,tell,allocated(Injured));
- -allocated(Injured)[source(_)];
- removePercept(allocated(Injured));
-  -closer(_)[source(self)];
-  removePercept(closer(Closer)).
++allocated(Injured,CloserAmb) 
+ <-
+ .send(CloserAmb,tell,allocated(Injured));
+ -allocated(Injured,_)[source(_)];
+ removePercept(allocated(Injured)).
+
+ 
   

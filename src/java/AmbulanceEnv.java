@@ -23,35 +23,12 @@ import java.util.logging.*;
 
 public class AmbulanceEnv extends Environment { 
 	
-	public class Mythread implements Runnable
-	{
-		Map map;
-		public Mythread(Map _map) {
-			map=_map;
-		}
-		@Override
-		public void run() 
-		{
-			while(true) 
-				{
-				map.stepTime();
-				try {Thread.sleep(100);} 
-				catch (InterruptedException e) {e.printStackTrace();}
-				}
-		}
-		
-		
-	}
-    
+	
     private Logger logger = Logger.getLogger("ambulanceProject."+AmbulanceEnv.class.getName());
     private Map map;
     private int sry=0;
-    private Thread th;
-    public AmbulanceEnv() {
-    	th=new Thread(new Mythread(RescueFramework.getMap()));
-    	th.start();
-    	RescueFramework.start(); 
-    	
+    public AmbulanceEnv() {    	
+    	RescueFramework.start();    	
     	
     }
 
@@ -142,7 +119,7 @@ public class AmbulanceEnv extends Environment {
     		Injured injured = map.getInjureds().get(i);
     		if(!injured.getBeingSaved()) {
     			//logger.info(agName + " received a call");     
-    			removePercept(agName,Literal.parseLiteral("injured("+injured.getLocation().getX()+","+injured.getLocation().getY()+")"));
+    			//removePercept(agName,Literal.parseLiteral("injured("+injured.getLocation().getX()+","+injured.getLocation().getY()+")"));
     			addPercept(agName,Literal.parseLiteral("injured("+injured.getLocation().getX()+","+injured.getLocation().getY()+")"));
     			//injured.beingSaved();
     		}
@@ -218,7 +195,7 @@ public class AmbulanceEnv extends Environment {
     				Path p = asc.search(a.getLocation(),injured,-1);
     				for(int i = 0; i<p.getLength();i++) {
     					map.moveRobot(a, p.getPath().get(i));
-    					map.stepTime();
+    					map.stepTime(false);
     					try {
     						Thread.sleep(Ambulance.getSpeed());
     					} catch (InterruptedException e) {
@@ -231,7 +208,7 @@ public class AmbulanceEnv extends Environment {
     		                a.getLocation().getInjured().setLocation(null);
     		                a.pickupInjured();    	
     		                searchForHospital(agName, a.getLocation());
-    		                map.stepTime();
+    		                map.stepTime(false);
     		        }else {
     		        	a.setAllocated(false);
     		        }
@@ -255,7 +232,7 @@ public class AmbulanceEnv extends Environment {
 			Path p = asc.search(a.getLocation(),h.getLocation(),-1);
 			for(int i = 0; i<p.getLength();i++) {
 				map.moveRobot(a, p.getPath().get(i));
-				map.stepTime();
+				map.stepTime(false);
 				try {
 					Thread.sleep(Ambulance.getSpeed());
 				} catch (InterruptedException e) {
@@ -270,7 +247,7 @@ public class AmbulanceEnv extends Environment {
         			//logger.info(agName + " letevo ciklusban vagyok");
         			if(!h.isFull()) {
         				try {
-							Thread.sleep(120);
+							Thread.sleep(200);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
@@ -279,9 +256,9 @@ public class AmbulanceEnv extends Environment {
         				savedInjured.setSaved();
         				h.addInjured(savedInjured);
         				map.getSavedInjureds().add(savedInjured);
-        				map.stepTime();
+        				map.stepTime(false);
         				break;
-        			}			      
+        			}	        			
         		} 	       		
 	        	
 	        	//removePercept(agName,Literal.parseLiteral("ambulanceReleased("+agName+")"));       

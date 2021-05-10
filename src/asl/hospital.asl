@@ -15,7 +15,6 @@
  .send(A,tell,hospitalBid(injured(X,Y),B,Me));
    -bid(B);
    removePercept(bid(B));
-   -injured(X,Y)[source(A)];
-   removePercept(injured(X,Y)[source(A)]).
+   -injured(_,_)[source(_)].
 
 

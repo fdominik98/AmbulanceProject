@@ -33,14 +33,13 @@
  saveInjured(X,Y);
   -allocated(Injured);
   removePercept(allocated(Injured));
- -injured(X,Y)[source(A)];
- removePercept(injured(X,Y)[source(A)]).
+ -injured(_,_)[source(_)].
   
 +neededHospital(H,X,Y) <- 
 	.print("sending to hospitals");
 	.send(H, tell, injured(X,Y));
-	-neededHospital(H,X,Y);
-	removePercept(neededHospital(H,X,Y)).
+	-neededHospital(_,_,_)[source(percept)].
+	
 			
 			
 +hospitalBid(Injured,D,Ag)
@@ -62,15 +61,14 @@
 +ambulanceReleased(A) 
 	<- ?allocated(injured(X,Y));
 	?station(S);
-	-allocated(injured(X,Y))[source(_)];
-	.send(S,tell, plesremove(injured(X,Y)));
-	//.send("phoneCenter",tell, check(A));
+	-allocated(injured(_,_))[source(_)];
+	.send(S,tell, plesremove(injured(X,Y)));	
 	-ambulanceReleased(A);
 	removePercept(ambulanceReleased(A)).
    
 +remove(injured(X,Y))<-
-	-injured(X,Y)[source(_)];
-	-remove(injured(X,Y))[source(_)].
+	-injured(_,_)[source(_)];
+	-remove(injured(_,_))[source(_)].
  
  
 

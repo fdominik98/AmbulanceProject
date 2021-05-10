@@ -17,6 +17,28 @@ import world.Injured;
  * Main frame of the simulator
  */
 public class MainFrame extends javax.swing.JFrame{
+	public class Mythread implements Runnable
+	{
+		Map map;
+		boolean stoped;
+		public Mythread(Map _map) {
+			map=_map;
+			stoped=false;
+		}
+		@Override
+		public void run() 
+		{
+			while(!stoped) 
+				{
+				map.stepTime(true);
+				try {Thread.sleep(1000);} 
+				catch (InterruptedException e) {e.printStackTrace();}
+				}
+		}
+		public void stop() {
+			stoped=true;
+		}	
+	}
     
     /**
      * Creates new form MainFrame
@@ -39,7 +61,7 @@ public class MainFrame extends javax.swing.JFrame{
                 jComboBox1.addItem(fileName);
                 if (fileName.equals(lastMap)) selectedIndex = i;
             } 
-        }
+        }    
         
         // Select the last used map based on the saved settings
         if (selectedIndex>=0) jComboBox1.setSelectedIndex(selectedIndex);
@@ -78,7 +100,7 @@ public class MainFrame extends javax.swing.JFrame{
                 Settings.setInt("width", getWidth());
                 Settings.setInt("height", getHeight());
             }
-        });        
+        });  
   
     }
     
@@ -222,6 +244,7 @@ public class MainFrame extends javax.swing.JFrame{
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    Mythread myTh = null;
     /**
      * The user clicks the Load map button
      * 
@@ -229,6 +252,7 @@ public class MainFrame extends javax.swing.JFrame{
      */
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // Save selected map and agent count
+    	
         String map = jComboBox1.getSelectedItem()+"";
         int ambulanceCount = Settings.getInt("ambulance_per_station",2);
         int hospitalCapacity = (Integer)hospitalSpinner.getValue();
@@ -240,6 +264,11 @@ public class MainFrame extends javax.swing.JFrame{
         Ambulance.resetNextId();
         Hospital.resetNextId();
         Station.resetNextId();
+        if(myTh != null)
+        	myTh.stop();
+        myTh = new Mythread(RescueFramework.getMap());
+        Thread th = new Thread(myTh);
+        th.start();
         
 
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -313,7 +342,7 @@ public class MainFrame extends javax.swing.JFrame{
                     Ambulance r = RescueFramework.map.getRobots().get(0);
                     if (r != null) {
                         RescueFramework.map.moveRobot(r,dir);
-                        RescueFramework.map.stepTime();
+                        RescueFramework.map.stepTime(false);
                     }                  
                 }               
             } 

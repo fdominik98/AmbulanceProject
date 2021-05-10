@@ -158,10 +158,7 @@ public class PaintPanel extends JPanel{
         // Draw saved patients on the bottom row
         int x = 0;
         int y = map.getHeight()-1;
-        for (int i=0; i<map.getSavedInjureds().size(); i++) {
-            drawInjured(g2, map.getCell(x, y), cellSize, map.getSavedInjureds().get(i));
-            x++;
-        }
+       
         
         // Draw cell grid above all
        /* g2.setColor(Color.BLACK);
@@ -331,7 +328,7 @@ public class PaintPanel extends JPanel{
            c.setInjured(i);
            i.setLocation(c);
            RescueFramework.map.addInjured(i);
-           RescueFramework.map.stepTime();
+           RescueFramework.map.stepTime(false);
         }
     }
     
