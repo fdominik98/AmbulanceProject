@@ -45,3 +45,13 @@
  <- !check(calls);
  -check(B);
  removePercept(check(B)).
+ 
+ +plesremove(injured(X,Y))
+<-
+	.findall(A, station(A),LP);
+	.send(LP, tell,remove(injured(X,Y)) );
+	-injured(X,Y)[source(_)];
+	-plesremove(injured(X,Y))[source(_)].
+	
+
+ 

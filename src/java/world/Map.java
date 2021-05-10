@@ -19,6 +19,30 @@ import rescueframework.RescueFramework;
  * The map representing the state of the world
  */
 public class Map implements RobotPercepcion{
+	public class Mythread implements Runnable
+	{
+		Map map;
+		boolean stoped;
+		public Mythread(Map _map) {
+			map=_map;
+			stoped=false;
+		}
+		@Override
+		public void run() 
+		{
+			while(stoped) 
+				{
+				map.stepTime();
+				try {Thread.sleep(100);} 
+				catch (InterruptedException e) {e.printStackTrace();}
+				}
+		}
+		public void stop() {
+			stoped=true;
+		}
+		
+		
+	}
     // Cell matrix of the map
     private Cell cells[][];
     // Dimensions of the map
@@ -179,7 +203,7 @@ public class Map implements RobotPercepcion{
         // Init agents       
         
         // Update agent visibility and repaint GUI
-      
+ 
         RescueFramework.refresh();
     }
       
@@ -456,6 +480,9 @@ public class Map implements RobotPercepcion{
     			return s;
     	}
     	return null;
+    }
+    public ArrayList<Station> getStations(){
+    	return stations;
     }
     public Hospital getHospitalById(String id) {
     	for(Hospital h: hospitals) {

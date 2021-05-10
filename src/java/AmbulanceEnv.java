@@ -20,26 +20,64 @@ import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.*;
 
+
 public class AmbulanceEnv extends Environment { 
+	
+	public class Mythread implements Runnable
+	{
+		Map map;
+		public Mythread(Map _map) {
+			map=_map;
+		}
+		@Override
+		public void run() 
+		{
+			while(true) 
+				{
+				map.stepTime();
+				try {Thread.sleep(100);} 
+				catch (InterruptedException e) {e.printStackTrace();}
+				}
+		}
+		
+		
+	}
     
     private Logger logger = Logger.getLogger("ambulanceProject."+AmbulanceEnv.class.getName());
     private Map map;
-    
+    private int sry=0;
+    private Thread th;
     public AmbulanceEnv() {
-    	RescueFramework.start();    	
+    	th=new Thread(new Mythread(RescueFramework.getMap()));
+    	th.start();
+    	RescueFramework.start(); 
+    	
+    	
     }
 
     /** Called before the MAS execution with the args informed in .mas2j */
     @Override
     public void init(String[] args) {
-        super.init(args);       
+        super.init(args);  
+        
        
     }
 
     @Override
     public boolean executeAction(String agName, Structure action) {   	
     	
-    	map = RescueFramework.getMap();       
+    	map = RescueFramework.getMap(); 
+    	if(sry==0) {
+    		for(Station s:map.getStations()) {
+    			for(Ambulance a: s.getAmbulances()) {
+    				addPercept(a.getId(),Literal.parseLiteral("station("+s.getId()+")"));
+    				}
+    		}
+    		
+    		
+    		sry=1;
+    		
+        }
         if (action.getFunctor().equals("checkIfHas")) { // you may improve this condition        	
         	callCheck(agName);
         }
@@ -103,7 +141,7 @@ public class AmbulanceEnv extends Environment {
     	for(int i = 0; i< map.getInjureds().size(); i++) {
     		Injured injured = map.getInjureds().get(i);
     		if(!injured.getBeingSaved()) {
-    			//logger.info(agName + " received a call");      
+    			//logger.info(agName + " received a call");     
     			removePercept(agName,Literal.parseLiteral("injured("+injured.getLocation().getX()+","+injured.getLocation().getY()+")"));
     			addPercept(agName,Literal.parseLiteral("injured("+injured.getLocation().getX()+","+injured.getLocation().getY()+")"));
     			//injured.beingSaved();
@@ -117,7 +155,7 @@ public class AmbulanceEnv extends Environment {
     		CopyOnWriteArrayList<Ambulance> as= s.getAmbulances();
     		for(Ambulance a : as) {
     			//logger.info(a.getId()+" needed.");     	
-    			removePercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+","+x+","+y+")"));       
+    			//removePercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+","+x+","+y+")"));       
     			addPercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+","+x+","+y+")"));     			
     		}
     	}
@@ -135,7 +173,7 @@ public class AmbulanceEnv extends Environment {
 	       		Path p = asc.search(a.getLocation(),injured,-1);
 	       		if (p != null) {	       			
 	       		//	logger.info(agName + " counted a bid: "+p.getLength());	  
-	       			removePercept(agName,Literal.parseLiteral("bid("+p.getLength()+")"));
+	       			//removePercept(agName,Literal.parseLiteral("bid("+p.getLength()+")"));
 	       			addPercept(agName,Literal.parseLiteral("bid("+p.getLength()+")"));  
 	       			return;
 	       		}    	
@@ -162,7 +200,7 @@ public class AmbulanceEnv extends Environment {
        			bid += p.getLength();
        		//	logger.info(agName + " counted a bid: "+p.getLength());	  
 	       	    	
-       		removePercept(agName,Literal.parseLiteral("bid("+bid+")"));
+       		//removePercept(agName,Literal.parseLiteral("bid("+bid+")"));
        		addPercept(agName,Literal.parseLiteral("bid("+bid+")"));  
     		}   
     	}
@@ -204,7 +242,7 @@ public class AmbulanceEnv extends Environment {
     }
     public void searchForHospital(String agName, Cell loc) {
     	for(Hospital h : map.getHospitals()) {
-    		removePercept(agName,Literal.parseLiteral("neededHospital("+h.getId()+","+loc.getX()+","+loc.getY()+")"));       
+    		//removePercept(agName,Literal.parseLiteral("neededHospital("+h.getId()+","+loc.getX()+","+loc.getY()+")"));       
 			addPercept(agName,Literal.parseLiteral("neededHospital("+h.getId()+","+loc.getX()+","+loc.getY()+")"));        			
     	}
     	
@@ -227,9 +265,16 @@ public class AmbulanceEnv extends Environment {
 			}		
 	        
 	        if (a.hasInjured() && a.getLocation().getHospital()!= null) {
-	        
+	        	logger.info(agName + " a korhaznal vagyok");
         		while(true) {
+        			//logger.info(agName + " letevo ciklusban vagyok");
         			if(!h.isFull()) {
+        				try {
+							Thread.sleep(120);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+        				logger.info(agName + " letszem");
         				Injured savedInjured = a.dropInjured();
         				savedInjured.setSaved();
         				h.addInjured(savedInjured);
@@ -239,7 +284,7 @@ public class AmbulanceEnv extends Environment {
         			}			      
         		} 	       		
 	        	
-	        	removePercept(agName,Literal.parseLiteral("ambulanceReleased("+agName+")"));       
+	        	//removePercept(agName,Literal.parseLiteral("ambulanceReleased("+agName+")"));       
 				addPercept(agName,Literal.parseLiteral("ambulanceReleased("+agName+")"));  
 	        }
     	}

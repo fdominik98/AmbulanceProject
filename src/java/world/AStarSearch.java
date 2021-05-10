@@ -100,7 +100,7 @@ public class AStarSearch {
                 if (possibleNeighbour != null) {                 
                         
                         if (!possibleNeighbour.hasObstacle() || possibleNeighbour.equals(target)) {
-                            if (!possibleNeighbour.hasInjured() || possibleNeighbour.equals(target)) {
+                            if (/*!possibleNeighbour.hasInjured()*/ true || possibleNeighbour.equals(target)) {
                                 boolean skip = false;
 
                                 // Check on open list

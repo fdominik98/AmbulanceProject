@@ -2,19 +2,23 @@
 
 /* Initial beliefs and rules */
 
+
 /* Initial goals */
 
 
 
 /* Plans */
 
-
++started : .my_name(ME) <-?station(S) .send(S, tell, ambulance(ME));
+							-started.
 
 
 +injured(X,Y)[source(A)]
-  <-   countAmbulance(X,Y).
+  <-   countAmbulance(X,Y);
+  +started.
 
- 
+
+	
   
 +bid(B) : .my_name(Me)
  <- ?injured(X,Y)[source(A)];
@@ -56,11 +60,17 @@
      goToHospital(Closer).
 
 +ambulanceReleased(A) 
-	<- .send("phoneCenter",tell, check(A));
+	<- ?allocated(injured(X,Y));
+	?station(S);
+	-allocated(injured(X,Y))[source(_)];
+	.send(S,tell, plesremove(injured(X,Y)));
+	//.send("phoneCenter",tell, check(A));
 	-ambulanceReleased(A);
 	removePercept(ambulanceReleased(A)).
    
-
++remove(injured(X,Y))<-
+	-injured(X,Y)[source(_)];
+	-remove(injured(X,Y))[source(_)].
  
  
 
