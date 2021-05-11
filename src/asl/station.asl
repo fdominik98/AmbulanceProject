@@ -12,32 +12,32 @@ started.
 +started : .my_name(ME) <- .send("phoneCenter", tell, station(ME));
 							-started.
 
-+injured(X,Y)[source(A)] 
++injured(X,Y,ID)[source(A)] 
 	<-//.print("found injured at: ",X,";",Y, " from ",A);	
 	.findall(B,ambul(B),LP);
 	.print(LP);
-	 countStation(X,Y);
-	-injured(_,_)[source(_)].
+	 countStation(X,Y,ID);
+	-injured(_,_,_)[source(_)].
 		
 
  
- +neededAmbulance(A, X, Y) <- 
+ +neededAmbulance(A, X, Y,ID) <- 
  			//.print("sending to ambulances");
-			.send(A, tell, injured(X,Y));
-			-neededAmbulance(_,_,_)[source(percept)].
+			.send(A, tell, injured(X,Y,ID));
+			-neededAmbulance(_,_,_,_)[source(percept)].
 			
 
-+remove(injured(X,Y))
++remove(injured(X,Y,ID))
 <-
 	.findall(A, ambulance(A),LP);
-	.send(LP, tell,remove(injured(X,Y)) );
-	-allocated(injured(X,Y))[source(_)];
-	-remove(injured(X,Y))[source(_)].	
+	.send(LP, tell,remove(injured(X,Y,ID)) );
+	-allocated(injured(_,_,_))[source(_)];
+	-remove(injured(_,_,_))[source(_)].	
 	
-+plesremove(injured(X,Y))
++plesremove(injured(X,Y,ID))
 <-
-	.send("phoneCenter", tell,plesremove(injured(X,Y)) );
-	-plesremove(injured(_,_))[source(_)].	
+	.send("phoneCenter", tell,plesremove(injured(X,Y,ID)) );
+	-plesremove(injured(_,_,_))[source(_)].	
 			 
 			 
 +ambulanceBid(Injured,D,Ag)

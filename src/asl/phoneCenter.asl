@@ -14,11 +14,11 @@
       !check(calls).  
  
 
-+injured(X,Y) <- 
++injured(X,Y,ID) <- 
 		//.print("found injured at: ",X,";",Y);
-       .send(station1, tell, injured(X,Y));
-		.send(station2, tell, injured(X,Y));
-		-injured(_,_)[source(_)].
+       .send(station1, tell, injured(X,Y,ID));
+		.send(station2, tell, injured(X,Y,ID));
+		-injured(_,_,_)[source(_)].
 
       
 +stationBid(Injured,D,Ag,CloserAmb)
@@ -41,12 +41,12 @@
   <- .print("could not allocate injured ",Injured).  
 
  
- +plesremove(injured(X,Y))
+ +plesremove(injured(X,Y,ID))
 <-
 	.findall(A, station(A),LP);
-	.send(LP, tell,remove(injured(X,Y)) );
-	-injured(_,_)[source(_)];
-	-plesremove(injured(_,_))[source(_)].
+	.send(LP, tell,remove(injured(X,Y,ID)) );
+	-injured(_,_,_)[source(_)];
+	-plesremove(injured(_,_,_))[source(_)].
 	
 
  

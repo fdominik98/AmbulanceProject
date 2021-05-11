@@ -335,9 +335,7 @@ public class Map implements RobotPercepcion{
      */
     public void stepTime(boolean incTime) {
     	if(incTime)
-    		time++;
-        RescueFramework.log(" ---  Step "+time+"");
-        
+    		time++;        
         for(Hospital h : hospitals)
         	h.healInjureds();
         

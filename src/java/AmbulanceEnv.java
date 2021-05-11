@@ -62,7 +62,8 @@ public class AmbulanceEnv extends Environment {
         	try {
 				int x = (int)((NumberTerm)action.getTerm(0)).solve();
 				int y = (int)((NumberTerm)action.getTerm(1)).solve();
-				countStationBid(agName , x ,y );          	
+				int id = (int)((NumberTerm)action.getTerm(2)).solve();
+				countStationBid(agName , x ,y,id );          	
 			} catch (NoValueException e) {
 				e.printStackTrace();
 			}         	
@@ -116,24 +117,25 @@ public class AmbulanceEnv extends Environment {
     
     public void callCheck(String agName) {
     	for(int i = 0; i< map.getInjureds().size(); i++) {
+    	
     		Injured injured = map.getInjureds().get(i);
     		if(!injured.getBeingSaved()) {
     			//logger.info(agName + " received a call");     
-    			//removePercept(agName,Literal.parseLiteral("injured("+injured.getLocation().getX()+","+injured.getLocation().getY()+")"));
-    			addPercept(agName,Literal.parseLiteral("injured("+injured.getLocation().getX()+","+injured.getLocation().getY()+")"));
-    			//injured.beingSaved();
+    			
+    			addPercept(agName,Literal.parseLiteral("injured("+injured.getLocation().getX()+","+injured.getLocation().getY()+","+injured.getId()+")"));
+    			//injured.beingSaved();    		
     		}
     		
     	}    	
     }
-    public void countStationBid(String agName, int x, int y) {   
+    public void countStationBid(String agName, int x, int y,int id) {   
     	Station s = map.getStationById(agName);
     	if(s != null) {    		
     		CopyOnWriteArrayList<Ambulance> as= s.getAmbulances();
     		for(Ambulance a : as) {
     			//logger.info(a.getId()+" needed.");     	
     			//removePercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+","+x+","+y+")"));       
-    			addPercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+","+x+","+y+")"));     			
+    			addPercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+","+x+","+y+","+id+")"));     			
     		}
     	}
 		
@@ -207,7 +209,7 @@ public class AmbulanceEnv extends Environment {
     		        if (a.getLocation().hasInjured()) {    		            
     		                a.getLocation().getInjured().setLocation(null);
     		                a.pickupInjured();    	
-    		                searchForHospital(agName, a.getLocation());
+    		                searchForHospital(agName, a.getLocation(),a.getInjured().getId());
     		                map.stepTime(false);
     		        }else {
     		        	a.setAllocated(false);
@@ -217,10 +219,10 @@ public class AmbulanceEnv extends Environment {
     		}    		
     	}    	
     }
-    public void searchForHospital(String agName, Cell loc) {
+    public void searchForHospital(String agName, Cell loc,int injuredId) {
     	for(Hospital h : map.getHospitals()) {
     		//removePercept(agName,Literal.parseLiteral("neededHospital("+h.getId()+","+loc.getX()+","+loc.getY()+")"));       
-			addPercept(agName,Literal.parseLiteral("neededHospital("+h.getId()+","+loc.getX()+","+loc.getY()+")"));        			
+			addPercept(agName,Literal.parseLiteral("neededHospital("+h.getId()+","+loc.getX()+","+loc.getY()+","+injuredId+")"));        			
     	}
     	
     }
@@ -246,11 +248,7 @@ public class AmbulanceEnv extends Environment {
         		while(true) {
         			//logger.info(agName + " letevo ciklusban vagyok");
         			if(!h.isFull()) {
-        				try {
-							Thread.sleep(200);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
+        			
         				logger.info(agName + " letszem");
         				Injured savedInjured = a.dropInjured();
         				savedInjured.setSaved();
@@ -258,7 +256,13 @@ public class AmbulanceEnv extends Environment {
         				map.getSavedInjureds().add(savedInjured);
         				map.stepTime(false);
         				break;
-        			}	        			
+        			}
+        			try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
         		} 	       		
 	        	
 	        	//removePercept(agName,Literal.parseLiteral("ambulanceReleased("+agName+")"));       

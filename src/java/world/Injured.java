@@ -108,7 +108,10 @@ public class Injured {
      */
     public String toString() {
         return "ID="+id+" with health "+health;
-    }   
+    } 
+    public int getId() {
+    	return id;
+    }
 
     
 }
