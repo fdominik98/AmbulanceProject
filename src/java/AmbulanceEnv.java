@@ -59,32 +59,26 @@ public class AmbulanceEnv extends Environment {
         	callCheck(agName);
         }
         else if(action.getFunctor().equals("countStation")) {          	
-        	try {
-				int x = (int)((NumberTerm)action.getTerm(0)).solve();
-				int y = (int)((NumberTerm)action.getTerm(1)).solve();
-				int id = (int)((NumberTerm)action.getTerm(2)).solve();
-				countStationBid(agName , x ,y,id );          	
+        	try {	
+				int id = (int)((NumberTerm)action.getTerm(0)).solve();
+				countStationBid(agName,id );          	
 			} catch (NoValueException e) {
 				e.printStackTrace();
 			}         	
         }
         else if(action.getFunctor().equals("countAmbulance")) {       	
 			try {
-				int x = (int)((NumberTerm)action.getTerm(0)).solve();
-				int y = (int)((NumberTerm)action.getTerm(1)).solve();
-				countAmbulanceBid(agName , x ,y );          	
+				int id = (int)((NumberTerm)action.getTerm(0)).solve();				
+				countAmbulanceBid(agName,id);          	
 			} catch (NoValueException e) {
 				e.printStackTrace();
 			}
         }
-        else if(action.getFunctor().equals("countHospital")) {       	
-			try {
-				int x = (int)((NumberTerm)action.getTerm(0)).solve();
-				int y = (int)((NumberTerm)action.getTerm(1)).solve();
-				countHospitalBid(agName , x ,y );          	
-			} catch (NoValueException e) {
-				e.printStackTrace();
-			}
+        else if(action.getFunctor().equals("countHospital")) {   
+		
+				String id = ((Atom)action.getTerm(0)).toString();		
+				countHospitalBid(agName,id);          	
+		
         }
         else if(action.getFunctor().equals("goToHospital")) {         			
   				String h = ((Atom)action.getTerm(0)).toString(); 
@@ -92,9 +86,19 @@ public class AmbulanceEnv extends Environment {
           }
         else if(action.getFunctor().equals("saveInjured")) {       	
   			try {
-  				int x = (int)((NumberTerm)action.getTerm(0)).solve();
-  				int y = (int)((NumberTerm)action.getTerm(1)).solve();
-  				saveInjured(agName , x ,y ); 				
+  				Literal l = (Literal)action.getTerm(0);
+  				int id = (int)((NumberTerm)l.getTerm(0)).solve();  				
+  				saveInjured(agName,id); 				
+  			} catch (NoValueException e) {
+  				e.printStackTrace();
+  			}
+          }
+        else if(action.getFunctor().equals("setNewId")) {       	
+  			try {
+  				Literal l = (Literal)action.getTerm(0);
+  				int id = (int)((NumberTerm)l.getTerm(0)).solve();
+  				map.getInjuredById(id).changeId();
+  						
   			} catch (NoValueException e) {
   				e.printStackTrace();
   			}
@@ -115,39 +119,45 @@ public class AmbulanceEnv extends Environment {
         super.stop();
     }
     
-    public void callCheck(String agName) {
+    public void callCheck(String agName){
     	for(int i = 0; i< map.getInjureds().size(); i++) {
     	
     		Injured injured = map.getInjureds().get(i);
     		if(!injured.getBeingSaved()) {
-    			//logger.info(agName + " received a call");     
-    			
-    			addPercept(agName,Literal.parseLiteral("injured("+injured.getLocation().getX()+","+injured.getLocation().getY()+","+injured.getId()+")"));
-    			//injured.beingSaved();    		
+    			if(injured != null) {
+    				//logger.info(agName + " received a call");     
+    				try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+    				addPercept(agName,Literal.parseLiteral("injured("+injured.getId()+")"));
+    				//injured.beingSaved();    		
+    			}
     		}
     		
     	}    	
     }
-    public void countStationBid(String agName, int x, int y,int id) {   
+    public void countStationBid(String agName, int injuredId) {   
     	Station s = map.getStationById(agName);
     	if(s != null) {    		
     		CopyOnWriteArrayList<Ambulance> as= s.getAmbulances();
     		for(Ambulance a : as) {
     			//logger.info(a.getId()+" needed.");     	
     			//removePercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+","+x+","+y+")"));       
-    			addPercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+","+x+","+y+","+id+")"));     			
+    			addPercept(agName,Literal.parseLiteral("neededAmbulance("+a.getId()+","+injuredId+")"));     			
     		}
     	}
 		
     }
-    public void countAmbulanceBid(String agName , int x, int y) {    	
+    public void countAmbulanceBid(String agName , int injuredId) {    	
     	  	
-    	Cell injured = map.getCell(x, y);
+    	Cell injured = map.getInjuredById(injuredId).getLocation();
     	Ambulance a = map.getAmbulanceById(agName);
     	
     	if(a != null) {    		
-    		if(!a.isAllocated()) {    		
-	       		logger.info(agName + ": "+a.getLocation().getX() + "," +a.getLocation().getY());
+    		if(!a.isAllocated()) {    	       		
 	       		AStarSearch asc = new AStarSearch();
 	       		Path p = asc.search(a.getLocation(),injured,-1);
 	       		if (p != null) {	       			
@@ -157,24 +167,21 @@ public class AmbulanceEnv extends Environment {
 	       			return;
 	       		}    	
     		}   
-    	}
-    	removePercept(agName,Literal.parseLiteral("bid("+1000000+")"));  
+    	}    	
 		addPercept(agName,Literal.parseLiteral("bid("+1000000+")")); 
     	 	
     }
-    public void countHospitalBid(String agName , int x, int y) {    	
+    public void countHospitalBid(String agName , String ambulanceId) {    	
 	  	
-    	Cell injured = map.getCell(x, y);
+    	Cell ambulance = map.getAmbulanceById(ambulanceId).getLocation();    		  
     	Hospital h = map.getHospitalById(agName);	
     	if(h != null) {
     		int bid = 0;
     		if(h.isFull()) {  
     			bid += 100000;
     		}
-    		   		
-       		logger.info(agName + ": "+h.getLocation().getX() + "," +h.getLocation().getY());
        		AStarSearch asc = new AStarSearch();
-       		Path p = asc.search(h.getLocation(),injured,-1);
+       		Path p = asc.search(h.getLocation(),ambulance,-1);
        		if (p != null) {	      
        			bid += p.getLength();
        		//	logger.info(agName + " counted a bid: "+p.getLength());	  
@@ -185,8 +192,8 @@ public class AmbulanceEnv extends Environment {
     	}
     	 	
     }
-    public void saveInjured(String agName, int x, int y) {
-    	Cell injured = map.getCell(x, y);
+    public void saveInjured(String agName, int injuredId) {
+    	Cell injured = map.getInjuredById(injuredId).getLocation();
     	if(injured.getInjured()!= null) {
     		Ambulance a = map.getAmbulanceById(agName);	
     		if(a != null) {
@@ -209,7 +216,7 @@ public class AmbulanceEnv extends Environment {
     		        if (a.getLocation().hasInjured()) {    		            
     		                a.getLocation().getInjured().setLocation(null);
     		                a.pickupInjured();    	
-    		                searchForHospital(agName, a.getLocation(),a.getInjured().getId());
+    		                searchForHospital(agName,a.getInjured().getId());
     		                map.stepTime(false);
     		        }else {
     		        	a.setAllocated(false);
@@ -219,10 +226,9 @@ public class AmbulanceEnv extends Environment {
     		}    		
     	}    	
     }
-    public void searchForHospital(String agName, Cell loc,int injuredId) {
-    	for(Hospital h : map.getHospitals()) {
-    		//removePercept(agName,Literal.parseLiteral("neededHospital("+h.getId()+","+loc.getX()+","+loc.getY()+")"));       
-			addPercept(agName,Literal.parseLiteral("neededHospital("+h.getId()+","+loc.getX()+","+loc.getY()+","+injuredId+")"));        			
+    public void searchForHospital(String agName,int injuredId) {
+    	for(Hospital h : map.getHospitals()) {    		     
+			addPercept(agName,Literal.parseLiteral("neededHospital("+h.getId()+","+injuredId+")"));        			
     	}
     	
     }
@@ -263,10 +269,8 @@ public class AmbulanceEnv extends Environment {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-        		} 	       		
+        		}        	
 	        	
-	        	//removePercept(agName,Literal.parseLiteral("ambulanceReleased("+agName+")"));       
-				addPercept(agName,Literal.parseLiteral("ambulanceReleased("+agName+")"));  
 	        }
     	}
     }

@@ -176,7 +176,7 @@ public class MainFrame extends javax.swing.JFrame{
         });
 
        
-        hospitalSpinner.setModel(new javax.swing.SpinnerNumberModel(1, 1, null, 1));
+        hospitalSpinner.setModel(new javax.swing.SpinnerNumberModel(3, 1, null, 1));
         hospitalSpinner.setFocusable(false);
 
         ambulanceLabel.setText("Ambulance/station:");

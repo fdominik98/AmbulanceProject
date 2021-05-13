@@ -334,22 +334,24 @@ public class Map implements RobotPercepcion{
      * @param stepRobots            If true robots are requetsed to step
      */
     public void stepTime(boolean incTime) {
-    	if(incTime)
+    	if(incTime) {
+    		for(Hospital h : hospitals)
+    			h.healInjureds();
+    		
     		time++;        
-        for(Hospital h : hospitals)
-        	h.healInjureds();
-        
-        // Calculate injured states
-        for (int i=0; i<injureds.size(); i++) {
-            Injured injured = injureds.get(i);
-            if (!injured.isSaved()) {
-                int prevHealth = injured.getHealth();
-                if (prevHealth>0) {
-                    prevHealth--;
-                    injured.setHealth(prevHealth);
-                }
-            }
-        }
+    		// Calculate injured states
+    		for (int i=0; i<injureds.size(); i++) {
+    			Injured injured = injureds.get(i);
+    			if (!injured.isSaved()) {
+    				int prevHealth = injured.getHealth();
+    				if (prevHealth>0) {
+    					prevHealth--;
+    					injured.setHealth(prevHealth);
+    				}
+    			}
+    		}
+    		
+    	}
         
         // Display robot paths
         displayPaths.clear();  
@@ -454,6 +456,13 @@ public class Map implements RobotPercepcion{
     	for(Station s: stations) {
     		if(s.getId().equals(id))
     			return s;
+    	}
+    	return null;
+    }
+    public Injured getInjuredById(int id) {
+    	for(Injured i: injureds) {
+    		if(i.getId() == id)
+    			return i;
     	}
     	return null;
     }

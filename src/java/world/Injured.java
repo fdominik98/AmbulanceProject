@@ -52,6 +52,10 @@ public class Injured {
         id = nextID;
         nextID++;
     }
+    public void changeId() {
+    	id = nextID;
+    	nextID++;
+    }
     
     /**
      * Return the health value of the injured

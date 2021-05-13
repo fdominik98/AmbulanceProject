@@ -7,14 +7,14 @@
 
 /* Plans */
 
-+injured(X,Y,ID)[source(A)]
-  <-  countHospital(X,Y).
++injured(ID)[source(A)]
+  <-  countHospital(A).
   
   +bid(B) : .my_name(Me)
- <- ?injured(X,Y,ID)[source(A)];
- .send(A,tell,hospitalBid(injured(X,Y,ID),B,Me));
-   -bid(B);
+ <- ?injured(ID)[source(A)];
+ .send(A,tell,hospitalBid(injured(ID),B,Me));
+   -bid(_);
    removePercept(bid(B));
-   -injured(_,_,_)[source(_)].
+   -injured(_)[source(_)].
 
 

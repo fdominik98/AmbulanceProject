@@ -13,32 +13,34 @@
 							-started.
 
 
-+injured(X,Y,ID)[source(A)]
-  <-   countAmbulance(X,Y);
++injured(ID)[source(A)]
+  <-   countAmbulance(ID);
   +started.
 
 
 	
   
 +bid(B) : .my_name(Me)
- <- ?injured(X,Y,ID)[source(A)];
- .send(A,tell,ambulanceBid(injured(X,Y,ID),B,Me));
-  -bid(B);
-  removePercept(bid(B)).
+ <- ?injured(ID)[source(A)];
+ .send(A,tell,ambulanceBid(injured(ID),B,Me));
+  -bid(_);
+  removePercept(bid(B));
+  -injured(_)[source(_)].
   
  
  +allocated(Injured) : .my_name(Me)
- <-  ?injured(X,Y,ID)[source(A)];
- .print("allocated ambulance: ",X," ",Y," ",Me);
- saveInjured(X,Y);
-  -allocated(Injured);
-  removePercept(allocated(Injured));
- -injured(_,_,_)[source(_)].
+ <- 
+ .print("allocated ambulance: ", Injured ,Me);
+ saveInjured(Injured);
+ -allocated(_)[source(_)] .
+
+
+
   
-+neededHospital(H,X,Y,ID) <- 
++neededHospital(H,ID) <- 
 	.print("sending to hospitals");
-	.send(H, tell, injured(X,Y,ID));
-	-neededHospital(_,_,_,_)[source(percept)].
+	.send(H, tell, injured(ID));
+	-neededHospital(_,_)[source(percept)].
 	
 			
 			
@@ -58,18 +60,6 @@
      .print("Injured ",Injured," was allocated to ",Closer, " options were ",LD);
      goToHospital(Closer).
 
-+ambulanceReleased(A) 
-	<- ?allocated(injured(X,Y,ID));
-	?station(S);
-	-allocated(injured(_,_,_))[source(_)];
-	.send(S,tell, plesremove(injured(X,Y,ID)));	
-	-ambulanceReleased(A);
-	removePercept(ambulanceReleased(A)).
-   
-+remove(injured(X,Y,ID))<-
-	-injured(_,_,_)[source(_)];
-	-remove(injured(_,_,_))[source(_)].
- 
- 
+
 
   

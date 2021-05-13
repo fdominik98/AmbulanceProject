@@ -14,18 +14,18 @@
       !check(calls).  
  
 
-+injured(X,Y,ID) <- 
++injured(ID) <- 
 		//.print("found injured at: ",X,";",Y);
-       .send(station1, tell, injured(X,Y,ID));
-		.send(station2, tell, injured(X,Y,ID));
-		-injured(_,_,_)[source(_)].
+       .send(station1, tell, injured(ID));
+		.send(station2, tell, injured(ID));
+		-injured(_)[source(_)].
 
       
 +stationBid(Injured,D,Ag,CloserAmb)
   :  .count(stationBid(Injured,_,_,_),2)  // two bids were received
   <- .print("bid from ",Ag," for ",Injured," is ",D);
      !allocate_station(Injured);
-     .abolish(stationBid(Injured,_,_,_)).     
+     .abolish(stationBid(_,_,_,_)).     
      
 +stationBid(Injured,D,Ag,CloserAmb)
   <- .print("bid from ",Ag," for ",Injured," is ",D).
@@ -38,15 +38,10 @@
      .send(Closer,tell,allocated(Injured,CloserAmb)).     
    
 -!allocate_station(Injured)
-  <- .print("could not allocate injured ",Injured).  
-
- 
- +plesremove(injured(X,Y,ID))
-<-
-	.findall(A, station(A),LP);
-	.send(LP, tell,remove(injured(X,Y,ID)) );
-	-injured(_,_,_)[source(_)];
-	-plesremove(injured(_,_,_))[source(_)].
+  <- .print("could not allocate injured ",Injured);
+  .abolish(stationBid(_,_,_,_));  
+  	setNewId(Injured).
 	
+ 
 
  
