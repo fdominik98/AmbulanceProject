@@ -82,6 +82,12 @@ public class AmbulanceEnv extends Environment {
   				e.printStackTrace();
   			}
           }
+        else if(action.getFunctor().equals("removePercept")) {       	
+    			
+    				Literal l = (Literal)action.getTerm(0);    							
+    				removePercept(agName,l);			
+    		
+            }
         else if(action.getFunctor().equals("setNewId")) {       	
   			try {
   				Literal l = (Literal)action.getTerm(0);
@@ -91,11 +97,7 @@ public class AmbulanceEnv extends Environment {
   			} catch (NoValueException e) {
   				e.printStackTrace();
   			}
-          }
-        else if(action.getFunctor().equals("removePercept")) {    		
-        	LiteralImpl P = ((LiteralImpl)action.getTerm(0));    			   				     	
- 				removePercept(agName,P);     		
-        }
+          }       
         else {
         	return false;
         }
