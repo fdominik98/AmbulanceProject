@@ -9,14 +9,11 @@
 
 /* Plans */
 
-+started : .my_name(ME) <-?station(S) .send(S, tell, ambulance(ME));
-							-started.
+
 
 
 +injured(ID)[source(A)]
-  <-   countAmbulance(ID);
-  +started.
-
+  <-   countAmbulance(ID).
 
 	
   
@@ -32,7 +29,7 @@
  <- 
  .print("allocated ambulance: ", Injured ,Me);
  saveInjured(Injured);
- -allocated(_)[source(_)] .
+ -allocated(_)[source(_)].
 
 
 

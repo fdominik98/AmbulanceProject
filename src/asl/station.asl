@@ -2,21 +2,17 @@
 
 /* Initial beliefs and rules */
 
-started.
+
 /* Initial goals */
 
 
 
 /* Plans */
 
-+started : .my_name(ME) <- .send("phoneCenter", tell, station(ME));
-							-started.
+
 
 +injured(ID)[source(A)] 
-	<-//.print("found injured at: ",X,";",Y, " from ",A);	
-	.findall(B,ambul(B),LP);
-	.print(LP);
-	 countStation(ID);
+	<- countStation(ID);
 	-injured(_)[source(_)].
 		
 

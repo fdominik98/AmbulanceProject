@@ -25,8 +25,7 @@ public class AmbulanceEnv extends Environment {
 	
 	
     private Logger logger = Logger.getLogger("ambulanceProject."+AmbulanceEnv.class.getName());
-    private Map map;
-    private int sry=0;
+    private Map map;   
     public AmbulanceEnv() {    	
     	RescueFramework.start();    	
     	
@@ -44,17 +43,7 @@ public class AmbulanceEnv extends Environment {
     public boolean executeAction(String agName, Structure action) {   	
     	
     	map = RescueFramework.getMap(); 
-    	if(sry==0) {
-    		for(Station s:map.getStations()) {
-    			for(Ambulance a: s.getAmbulances()) {
-    				addPercept(a.getId(),Literal.parseLiteral("station("+s.getId()+")"));
-    				}
-    		}
-    		
-    		
-    		sry=1;
-    		
-        }
+    	
         if (action.getFunctor().equals("checkIfHas")) { // you may improve this condition        	
         	callCheck(agName);
         }
